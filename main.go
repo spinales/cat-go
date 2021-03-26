@@ -14,6 +14,8 @@ var (
 )
 
 func main() {
+	// -t
+	vt := flag.Bool("t", false, "equivalent to -vT")
 	// -T, --show-tabs
 	flag.BoolVar(&t, "T", false, "display TAB characters as ^I")
 	flag.BoolVar(&t, "show-tabs", false, "display TAB characters as ^I")
@@ -32,6 +34,10 @@ func main() {
 
 	if *help {
 		options()
+	}
+
+	if *vt {
+		v, t = true, true
 	}
 
 	for _, f := range flag.Args() {
