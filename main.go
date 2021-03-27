@@ -17,9 +17,13 @@ var (
 	e  bool // -E, --show-ends
 	b  bool // -b, --number-nonblank
 	vE bool // -e
+	a  bool // -A, --show-all
 )
 
 func main() {
+	// -A, --show-all
+	flag.BoolVar(&a, "A", false, "equivalent to -vET")
+	flag.BoolVar(&a, "show-all", false, "equivalent to -vET")
 	// -e
 	flag.BoolVar(&vE, "e", false, "equivalent to -vE")
 	// -b, --number-nonblank
@@ -60,8 +64,12 @@ func main() {
 		v, t = true, true
 	}
 
-	if vE {
+	if a {
 		e, v = true, true
+	}
+
+	if vE {
+		e, v, t = true, true, true
 	}
 
 	for _, f := range flag.Args() {
