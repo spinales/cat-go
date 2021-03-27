@@ -6,15 +6,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 var (
 	v  bool // -v, --show-nonprinting
 	t  bool // -T, --show-tabs
 	st bool // -s, --squeeze-blank
+	n  bool // -n, --number
+	e  bool // -E, --show-ends
+	// d  bool // -E, --show-ends
 )
 
 func main() {
+	// -E, --show-ends
+	flag.BoolVar(&e, "E", false, "display $ at end of each line")
+	flag.BoolVar(&e, "show-ends", false, "display $ at end of each line")
+	// -n, --number
+	flag.BoolVar(&n, "n", false, "number all output lines")
+	flag.BoolVar(&n, "number", false, "number all output lines")
 	// -s, --squeeze-blank
 	flag.BoolVar(&st, "s", false, "suppress repeated empty output lines")
 	flag.BoolVar(&st, "squeeze-blank", false, "suppress repeated empty output lines")
@@ -45,15 +55,19 @@ func main() {
 	}
 
 	for _, f := range flag.Args() {
-		cat(f, *u, v, t, st)
+		cat(f, *u, v, t, st, n, e)
 	}
 }
 
-func cat(filename string, u bool, nonprinting bool, tabs bool, suppress bool) {
+func cat(filename string, u bool, nonprinting bool, tabs bool, suppress bool, number bool, dollar bool) {
 	result := openFile(filename)
 	result = flags(result, nonprinting, tabs, suppress)
-	if u {
+	if number {
+		numbersLine(string(result))
+	} else if u {
 		fmt.Println(result)
+	} else if dollar {
+		dollarLine(string(result))
 	} else {
 		fmt.Println(string(result))
 	}
@@ -74,6 +88,20 @@ func flags(arr []byte, nonprinting bool, tabs bool, suppress bool) []byte {
 		flags(arr, nonprinting, tabs, suppress)
 	}
 	return arr
+}
+
+// number all output lines
+func dollarLine(value string) {
+	for _, v := range strings.Split(value, "\n") {
+		fmt.Printf("%s%s\n", v, "$")
+	}
+}
+
+// number all output lines
+func numbersLine(value string) {
+	for i, v := range strings.Split(value, "\n") {
+		fmt.Printf("%v	%s\n", (i + 1), v)
+	}
 }
 
 // suppress repeated empty output lines
