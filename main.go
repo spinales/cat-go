@@ -9,11 +9,15 @@ import (
 )
 
 var (
-	v bool // -v, --show-nonprinting
-	t bool // -T, --show-tabs
+	v  bool // -v, --show-nonprinting
+	t  bool // -T, --show-tabs
+	st bool // -s, --squeeze-blank
 )
 
 func main() {
+	// -s, --squeeze-blank
+	flag.BoolVar(&st, "s", false, "suppress repeated empty output lines")
+	flag.BoolVar(&st, "squeeze-blank", false, "suppress repeated empty output lines")
 	// -t
 	vt := flag.Bool("t", false, "equivalent to -vT")
 	// -T, --show-tabs
@@ -41,13 +45,13 @@ func main() {
 	}
 
 	for _, f := range flag.Args() {
-		cat(f, *u, v, t)
+		cat(f, *u, v, t, st)
 	}
 }
 
-func cat(filename string, u bool, nonprinting bool, tabs bool) {
+func cat(filename string, u bool, nonprinting bool, tabs bool, suppress bool) {
 	result := openFile(filename)
-	result = flags(result, nonprinting, tabs)
+	result = flags(result, nonprinting, tabs, suppress)
 	if u {
 		fmt.Println(result)
 	} else {
@@ -55,15 +59,28 @@ func cat(filename string, u bool, nonprinting bool, tabs bool) {
 	}
 }
 
-func flags(arr []byte, nonprinting bool, tabs bool) []byte {
-	if nonprinting == true {
+func flags(arr []byte, nonprinting bool, tabs bool, suppress bool) []byte {
+	if nonprinting {
 		arr = invisibleChar(arr)
 		nonprinting = false
-		flags(arr, nonprinting, tabs)
-	} else if tabs == true {
+		flags(arr, nonprinting, tabs, suppress)
+	} else if tabs {
 		arr = replaceTabs(arr)
 		tabs = false
-		flags(arr, nonprinting, tabs)
+		flags(arr, nonprinting, tabs, suppress)
+	} else if suppress {
+		arr = suppressEmpty(arr)
+		suppress = false
+		flags(arr, nonprinting, tabs, suppress)
+	}
+	return arr
+}
+
+// suppress repeated empty output lines
+func suppressEmpty(arr []byte) []byte {
+	arr = bytes.Replace(arr, []byte{10, 10, 10}, []byte{10, 10}, 1)
+	if bytes.Contains(arr, []byte{10, 10, 10}) {
+		arr = suppressEmpty(arr)
 	}
 	return arr
 }

@@ -33,7 +33,3 @@ var invisible = map[byte]string{
 	30: "^^",
 	31: "^_",
 }
-
-var tab = map[int]string{
-	9: "^I",
-}
