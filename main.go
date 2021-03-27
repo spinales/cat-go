@@ -16,9 +16,12 @@ var (
 	n  bool // -n, --number
 	e  bool // -E, --show-ends
 	b  bool // -b, --number-nonblank
+	vE bool // -e
 )
 
 func main() {
+	// -e
+	flag.BoolVar(&vE, "e", false, "equivalent to -vE")
 	// -b, --number-nonblank
 	flag.BoolVar(&b, "b", false, "number nonempty output lines, overrides -n")
 	flag.BoolVar(&b, "number-nonblank", false, "number nonempty output lines, overrides -n")
@@ -55,6 +58,10 @@ func main() {
 
 	if *vt {
 		v, t = true, true
+	}
+
+	if vE {
+		e, v = true, true
 	}
 
 	for _, f := range flag.Args() {
