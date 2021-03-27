@@ -15,10 +15,13 @@ var (
 	st bool // -s, --squeeze-blank
 	n  bool // -n, --number
 	e  bool // -E, --show-ends
-	// d  bool // -E, --show-ends
+	b  bool // -b, --number-nonblank
 )
 
 func main() {
+	// -b, --number-nonblank
+	flag.BoolVar(&b, "b", false, "number nonempty output lines, overrides -n")
+	flag.BoolVar(&b, "number-nonblank", false, "number nonempty output lines, overrides -n")
 	// -E, --show-ends
 	flag.BoolVar(&e, "E", false, "display $ at end of each line")
 	flag.BoolVar(&e, "show-ends", false, "display $ at end of each line")
@@ -55,11 +58,11 @@ func main() {
 	}
 
 	for _, f := range flag.Args() {
-		cat(f, *u, v, t, st, n, e)
+		cat(f, *u, v, t, st, n, e, b)
 	}
 }
 
-func cat(filename string, u bool, nonprinting bool, tabs bool, suppress bool, number bool, dollar bool) {
+func cat(filename string, u bool, nonprinting bool, tabs bool, suppress bool, number bool, dollar bool, numbernospacesblank bool) {
 	result := openFile(filename)
 	result = flags(result, nonprinting, tabs, suppress)
 	if number {
@@ -68,6 +71,8 @@ func cat(filename string, u bool, nonprinting bool, tabs bool, suppress bool, nu
 		fmt.Println(result)
 	} else if dollar {
 		dollarLine(string(result))
+	} else if numbernospacesblank {
+		numberNoSpacesBlank(string(result))
 	} else {
 		fmt.Println(string(result))
 	}
@@ -88,6 +93,19 @@ func flags(arr []byte, nonprinting bool, tabs bool, suppress bool) []byte {
 		flags(arr, nonprinting, tabs, suppress)
 	}
 	return arr
+}
+
+// number nonempty output lines
+func numberNoSpacesBlank(value string) {
+	count := 1
+	for _, v := range strings.Split(value, "\n") {
+		if v == "" {
+			fmt.Println(v)
+		} else {
+			fmt.Println(count, v)
+			count++
+		}
+	}
 }
 
 // number all output lines
