@@ -125,9 +125,11 @@ func numberNoSpacesBlank(value string) {
 
 // number all output lines
 func dollarLine(value string) {
-	for _, v := range strings.Split(value, "\n") {
+	arr := strings.Split(value, "\n")
+	for _, v := range arr[:len(arr)-2] {
 		fmt.Printf("%s%s\n", v, "$")
 	}
+	fmt.Printf("%s\n", arr[:len(arr)-1])
 }
 
 // number all output lines
@@ -139,18 +141,13 @@ func numbersLine(value string) {
 
 // suppress repeated empty output lines
 func suppressEmpty(arr []byte) []byte {
-	arr = bytes.Replace(arr, []byte{10, 10, 10}, []byte{10, 10}, 1)
-	if bytes.Contains(arr, []byte{10, 10, 10}) {
-		arr = suppressEmpty(arr)
-	}
+	arr = bytes.ReplaceAll(arr, []byte{10, 10, 10}, []byte{10, 10})
 	return arr
 }
 
 // replace tabs
 func replaceTabs(arr []byte) []byte {
-	fmt.Println(arr, []byte{9}, []byte("^I"))
 	arr = bytes.ReplaceAll(arr, []byte{9}, []byte("^I"))
-	fmt.Println(arr, []byte{9}, []byte("^I"))
 	return arr
 }
 
